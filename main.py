@@ -1,7 +1,7 @@
 import pandas as pd
 
-INPUT_FILE = "КАДРЫ Заявки.xlsx"
-OUTPUT_FILE = "seating.xlsx"
+INPUT_FILE = "footages/КАДРЫ Заявки.xlsx"
+OUTPUT_FILE = "footages/seating.xlsx"
 NAME_COLUMN = "ФИО"
 
 
