@@ -1,10 +1,10 @@
-import json
 from typing import Any
 
 from pptx import Presentation
 
 from ai_analyzer import find_seating_groups
 from ai_analyzer import group_blocks_by_text
+from validation import validate_seating_block
 
 
 def inspect_pptx(
@@ -43,33 +43,20 @@ def inspect_pptx(
 
 
 if __name__ == "__main__":
-    pptx_path = "./footages/template.pptx"
+    pptx_path = "./footages/Template.pptx"
 
     text_bl = inspect_pptx(pptx_path)
-    print("Блоки:")
-
-    for block in text_bl:
-        print(block)
-
     groups = group_blocks_by_text(text_bl)
-
-    print("\nГруппы:")
-
-    for group in groups:
-        print(f"GROUP ID={group['group_id']}")
-        text = json.dumps(
-            group,
-            indent=4,
-        )
-        print(text)
-
     seating_groups = find_seating_groups(groups)
 
-    print("\nГруппы рассадки:")
+    required_tables = 6
+    seating_blocks = validate_seating_block(
+        seating_groups,
+        required_tables,
+    )
 
-    for group in seating_groups:
-        print(
-            f"group={group['group_id']} | "
-            f"count={group['count']} | "
-            f"shape_ids={group['shape_ids']}"
-        )
+    print(
+        f"\nВалидация пройдена: "
+        f"требуется {required_tables}, "
+        f"доступно {len(seating_blocks)}"
+    )
