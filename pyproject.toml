@@ -3,8 +3,7 @@ name = "tableshuffle"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
-    "black>=26.5.1",
-    "openai>=3.11.0",
+    "openai==3.13.0",
     "openpyxl>=3.1.5",
     "pandas>=3.0.5",
     "python-pptx>=1.0.2",
@@ -12,5 +11,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "black>=26.5.1",
     "pandas-stubs>=3.0.5.260730",
 ]
