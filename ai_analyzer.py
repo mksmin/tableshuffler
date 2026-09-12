@@ -111,7 +111,7 @@ def classify_group(
             },
         ],
         temperature=0,
-        max_tokens=5,
+        max_tokens=32,
         extra_body={
             "chat_template_kwargs": {
                 "enable_thinking": False,
@@ -121,8 +121,11 @@ def classify_group(
 
     content = response.choices[0].message.content
 
-    if content is None:
-        raise RuntimeError("Модель вернула пустой ответ")
+    if not content or not content.strip():
+        finish_reason = response.choices[0].finish_reason
+        raise RuntimeError(
+            f"Модель вернула пустой ответ. finish_reason={finish_reason!r}"
+        )
 
     role = content.strip().lower()
 
