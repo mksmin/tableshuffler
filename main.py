@@ -1,6 +1,6 @@
 import pandas as pd
 
-INPUT_FILE = "footages/КАДРЫ Заявки.xlsx"
+INPUT_FILE = "footages/participants_123.xlsx"
 OUTPUT_FILE = "footages/seating.xlsx"
 NAME_COLUMN = "ФИО"
 
