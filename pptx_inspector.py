@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from pptx import Presentation
@@ -50,26 +51,17 @@ if __name__ == "__main__":
     for block in text_bl:
         print(block)
 
-    # seating_blocks = find_seating_blocks(text_bl)
-    # print()
-    # print("Блоки рассадки:")
-    #
-    # for block in seating_blocks:
-    #     print(block)
-
     groups = group_blocks_by_text(text_bl)
 
     print("\nГруппы:")
 
     for group in groups:
-        print(
-            f"group={group['group_id']} | "
-            f"count={group['count']} | "
-            f"text={group['text']!r} | "
-            f"shape_ids={group['shape_ids']} | "
-            f"avg_width={group['avg_width']} | "
-            f"avg_height={group['avg_height']}"
+        print(f"GROUP ID={group['group_id']}")
+        text = json.dumps(
+            group,
+            indent=4,
         )
+        print(text)
 
     seating_groups = find_seating_groups(groups)
 
