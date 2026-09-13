@@ -15,6 +15,18 @@ client = OpenAI(
 )
 
 
+MODEL_SETTINGS: dict[str, Any] = {
+    "model": "qwen_qwen3.5-0.8b",
+    "temperature": 0,
+    "max_tokens": 100,
+    "extra_body": {
+        "chat_template_kwargs": {
+            "enable_thinking": False,
+        },
+    },
+}
+
+
 class Group(BaseModel):
     group_id: int
     text: str
@@ -38,16 +50,10 @@ def classify_group(
             "content": group_data,
         },
     ]
+
     model_settings = {
-        "model": "qwen3-8b",
+        **MODEL_SETTINGS,
         "messages": messages,
-        "temperature": 0,
-        "max_tokens": 100,
-        "extra_body": {
-            "chat_template_kwargs": {
-                "enable_thinking": False,
-            },
-        },
     }
 
     response = client.chat.completions.create(
