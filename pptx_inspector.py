@@ -1,9 +1,11 @@
+import time
 from collections import defaultdict
 from typing import Any
 
 from pptx import Presentation
 
 from ai_analyzer import find_seating_groups
+from pptx_writer import fill_seating_blocks
 from validation import validate_seating_block
 
 
@@ -33,6 +35,19 @@ def group_blocks_by_text(
             },
         )
     return result
+
+
+def sort_seating_blocks(
+    seating_blocks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    return sorted(
+        seating_blocks,
+        key=lambda block: (
+            block["slide"],
+            block["y"],
+            block["x"],
+        ),
+    )
 
 
 def inspect_pptx(
@@ -93,12 +108,16 @@ def inspect_pptx(
 
 
 if __name__ == "__main__":
+    start = time.time()
     pptx_path = "./footages/Template.pptx"
 
     text_bl = inspect_pptx(pptx_path)
     groups_block = group_blocks_by_text(text_bl)
 
+    llm_start = time.time()
     seating_groups = find_seating_groups(groups_block)
+    llm_end = time.time()
+    llm_duration = llm_end - llm_start
 
     required_tables = 1
     seating_blocks = validate_seating_block(
@@ -110,4 +129,41 @@ if __name__ == "__main__":
         f"\nВалидация пройдена: "
         f"требуется {required_tables}, "
         f"доступно {len(seating_blocks)}"
+    )
+
+    sorted_blocks = sort_seating_blocks(seating_blocks)
+    selected_blocks = sorted_blocks[:required_tables]
+
+    print("\nПорядок блоков:")
+
+    for table_num, block in enumerate(
+        selected_blocks,
+        start=1,
+    ):
+        print(
+            f"Стол {table_num}: "
+            f"slide={block['slide']}, "
+            f"shape_id={block['shape_id']}, "
+            f"x={block['x']}, "
+            f"y={block['y']}, "
+        )
+
+    end = time.time()
+    duration = end - start
+
+    print("duration: ", duration)
+    print("llm_duration: ", llm_duration)
+
+    tables = [
+        [
+            "Иванов Иван Иванович",
+            "Петров Петр Петрович",
+        ]
+    ]
+
+    fill_seating_blocks(
+        template_path=pptx_path,
+        output_path="./footages/result.pptx",
+        selected_blocks=selected_blocks,
+        tables=tables,
     )
