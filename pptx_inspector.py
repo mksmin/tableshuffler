@@ -1,3 +1,4 @@
+import logging
 import time
 from collections import defaultdict
 from typing import Any
@@ -7,6 +8,8 @@ from pptx import Presentation
 from ai_analyzer import find_seating_groups
 from pptx_writer import fill_seating_blocks
 from validation import validate_seating_block
+
+log = logging.getLogger(__name__)
 
 
 def group_blocks_by_text(
@@ -72,12 +75,12 @@ def inspect_pptx(
                     )
                 )
             except ValueError:
-                print("Введи номер слайда числом")
+                log.info("Введи номер слайда числом")
                 continue
 
             if choice_slide <= 0 or choice_slide > pres_len:
-                print(
-                    "Ошибка, выбери номер слайда. Всего в презентации слайдов:",
+                log.info(
+                    "Ошибка, выбери номер слайда. Всего в презентации слайдов: %s",
                     pres_len,
                 )
                 continue
@@ -108,6 +111,10 @@ def inspect_pptx(
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
     start = time.time()
     pptx_path = "./footages/template.pptx"
 
@@ -125,10 +132,10 @@ if __name__ == "__main__":
         required_tables,
     )
 
-    print(
-        f"\nВалидация пройдена: "
-        f"требуется {required_tables}, "
-        f"доступно {len(seating_blocks)}"
+    log.info(
+        "Валидация пройдена: требуется %s, доступно %s",
+        required_tables,
+        len(seating_blocks),
     )
 
     selected_blocks = select_seating_blocks(
@@ -136,25 +143,26 @@ if __name__ == "__main__":
         seating_blocks,
     )[:required_tables]
 
-    print("\nПорядок блоков:")
+    log.debug("Порядок блоков:")
 
     for table_num, block in enumerate(
         selected_blocks,
         start=1,
     ):
-        print(
-            f"Стол {table_num}: "
-            f"slide={block['slide']}, "
-            f"shape_id={block['shape_id']}, "
-            f"x={block['x']}, "
-            f"y={block['y']}, "
+        log.debug(
+            "Стол %s: slide=%s, shape_id=%s, x=%s, y=%s",
+            table_num,
+            block["slide"],
+            block["shape_id"],
+            block["x"],
+            block["y"],
         )
 
     end = time.time()
     duration = end - start
 
-    print("duration: ", duration)
-    print("llm_duration: ", llm_duration)
+    log.debug("duration: %.3f s", duration)
+    log.debug("llm_duration: %.3f s", llm_duration)
 
     tables = [
         [

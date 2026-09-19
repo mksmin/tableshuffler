@@ -1,8 +1,11 @@
+import logging
 from pathlib import Path
 from typing import Any
 
 from openai import OpenAI
 from pydantic import BaseModel
+
+log = logging.getLogger(__name__)
 
 PROMPT_PATH = Path(__file__).parent / "system_prompt.md"
 system_prompt = PROMPT_PATH.read_text(
@@ -88,11 +91,12 @@ def find_seating_groups(
     for group in groups:
         role = classify_group(group)
 
-        print(
-            f"Group {group.get("group_id")} | "
-            f"count={group.get('count')} | "
-            f"text={group.get('text')} | "
-            f"-> {role}",
+        log.debug(
+            "Group %s | count=%s | text=%r | -> %s",
+            group.get("group_id"),
+            group.get("count"),
+            group.get("text"),
+            role,
         )
 
         if role == "seating":
