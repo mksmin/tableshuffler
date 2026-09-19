@@ -37,17 +37,17 @@ def group_blocks_by_text(
     return result
 
 
-def sort_seating_blocks(
+def select_seating_blocks(
+    text_blocks: list[dict[str, Any]],
     seating_blocks: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    return sorted(
-        seating_blocks,
-        key=lambda block: (
-            block["slide"],
-            block["y"],
-            block["x"],
-        ),
-    )
+    """Возвращает найденные блоки в исходном порядке объектов PowerPoint."""
+    seating_keys = {(block["slide"], block["shape_id"]) for block in seating_blocks}
+    return [
+        block
+        for block in text_blocks
+        if (block["slide"], block["shape_id"]) in seating_keys
+    ]
 
 
 def inspect_pptx(
@@ -109,7 +109,7 @@ def inspect_pptx(
 
 if __name__ == "__main__":
     start = time.time()
-    pptx_path = "./footages/Template.pptx"
+    pptx_path = "./footages/template.pptx"
 
     text_bl = inspect_pptx(pptx_path)
     groups_block = group_blocks_by_text(text_bl)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     llm_end = time.time()
     llm_duration = llm_end - llm_start
 
-    required_tables = 1
+    required_tables = 4
     seating_blocks = validate_seating_block(
         seating_groups,
         required_tables,
@@ -131,8 +131,10 @@ if __name__ == "__main__":
         f"доступно {len(seating_blocks)}"
     )
 
-    sorted_blocks = sort_seating_blocks(seating_blocks)
-    selected_blocks = sorted_blocks[:required_tables]
+    selected_blocks = select_seating_blocks(
+        text_bl,
+        seating_blocks,
+    )[:required_tables]
 
     print("\nПорядок блоков:")
 
@@ -158,7 +160,19 @@ if __name__ == "__main__":
         [
             "Иванов Иван Иванович",
             "Петров Петр Петрович",
-        ]
+        ],
+        [
+            "Иванов Иван Иванович",
+            "Петров Петр Петрович",
+        ],
+        [
+            "Иванов Иван Иванович",
+            "Петров Петр Петрович",
+        ],
+        [
+            "Иванов Иван Иванович",
+            "Петров Петр Петрович",
+        ],
     ]
 
     fill_seating_blocks(
