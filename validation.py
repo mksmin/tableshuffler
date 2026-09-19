@@ -4,7 +4,7 @@ from typing import Any
 def validate_seating_block(
     seating_groups: list[dict[str, Any]],
     required_seats: int,
-):
+) -> list[dict[str, Any]]:
     seating_block = [block for group in seating_groups for block in group["blocks"]]
 
     found_blocks = len(seating_block)

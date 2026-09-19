@@ -1,18 +1,31 @@
 import pandas as pd
 
-INPUT_FILE = "footages/participants_123.xlsx"
+from ai_analyzer import find_seating_groups
+from pptx_inspector import (
+    group_blocks_by_text,
+    inspect_pptx,
+    select_seating_blocks,
+)
+from pptx_writer import fill_seating_blocks
+from validation import validate_seating_block
+
+INPUT_FILE = "footages/customers.xlsx"
 OUTPUT_FILE = "footages/seating.xlsx"
 NAME_COLUMN = "ФИО"
+
+TEMPLATE_FILE = "footages/template.pptx"
+OUTPUT_PPTX = "footages/result.pptx"
 
 
 def choose_sheet(
     file_path: str,
 ) -> str:
-    excel_file = pd.ExcelFile(file_path)
+    with pd.ExcelFile(file_path) as excel_file:
+        sheet_names = [str(name) for name in excel_file.sheet_names]
     print("\nДоступные листы:\n")
 
     for index, sheet_name in enumerate(
-        excel_file.sheet_names,
+        sheet_names,
         start=1,
     ):
         print(f"{index}. {sheet_name}")
@@ -23,8 +36,8 @@ def choose_sheet(
                 input("\nВведите номер листа (числом): "),
             )
 
-            if 1 <= choice <= len(excel_file.sheet_names):
-                return excel_file.sheet_names[choice - 1]
+            if 1 <= choice <= len(sheet_names):
+                return sheet_names[choice - 1]
 
             print("\nТакого листа нет")
 
@@ -53,6 +66,10 @@ def main() -> None:
     listeners = listeners[listeners[NAME_COLUMN] != ""]
     print(f"\nНайдено слушателей: {len(listeners)}")
 
+    if listeners.empty:
+        print("В выбранном листе нет участников.")
+        return
+
     while True:
         try:
             tables_count = int(
@@ -69,7 +86,7 @@ def main() -> None:
             break
 
         except ValueError:
-            print("Введите количество строк числом")
+            print("Введите количество столов числом")
 
     listeners = listeners.sample(
         frac=1,
@@ -85,12 +102,16 @@ def main() -> None:
     ]
 
     result_rows = []
+    tables: list[list[str]] = []
 
     for table_number in range(1, tables_count + 1):
         table = listeners[listeners["Стол"] == table_number].copy()
 
         table = table.sort_values(NAME_COLUMN)
 
+        tables.append(
+            table[NAME_COLUMN].tolist(),
+        )
         print(f"\nСтол {table_number}")
 
         for number, name in enumerate(
@@ -109,12 +130,33 @@ def main() -> None:
 
     result = pd.DataFrame(result_rows)
 
+    text_blocks = inspect_pptx(TEMPLATE_FILE)
+    groups = group_blocks_by_text(text_blocks)
+    seating_groups = find_seating_groups(groups)
+
+    validated_blocks = validate_seating_block(
+        seating_groups,
+        len(tables),
+    )
+    selected_blocks = select_seating_blocks(
+        text_blocks,
+        validated_blocks,
+    )[: len(tables)]
+
+    fill_seating_blocks(
+        template_path=TEMPLATE_FILE,
+        output_path=OUTPUT_PPTX,
+        selected_blocks=selected_blocks,
+        tables=tables,
+    )
+
     result.to_excel(
         OUTPUT_FILE,
         index=False,
     )
 
     print(f"\nГотово: {OUTPUT_FILE}")
+    print(f"Презентация сохранена: {OUTPUT_PPTX}")
     print(
         "Количество строк:",
         len(result_rows),
