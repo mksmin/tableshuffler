@@ -749,6 +749,7 @@ dependencies = [
     { name = "openai" },
     { name = "openpyxl" },
     { name = "pandas" },
+    { name = "platformdirs" },
     { name = "pydantic" },
     { name = "python-pptx" },
 ]
@@ -765,6 +766,7 @@ requires-dist = [
     { name = "openai", specifier = "==3.13.0" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.0.5" },
+    { name = "platformdirs", specifier = ">=4.11.8" },
     { name = "pydantic", specifier = ">=2.13.5" },
     { name = "python-pptx", specifier = ">=1.0.2" },
 ]
