@@ -3,7 +3,7 @@ name = "tableshuffle"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
-    "openai==3.13.0",
+    "openai==3.16.2",
     "openpyxl>=3.1.5",
     "pandas>=3.0.5",
     "platformdirs>=4.11.8",
